@@ -1,7 +1,5 @@
 # vlan_manager.py
 """
-File VLAN MANAGER (CRUD Logic)
-Dikerjakan oleh Anggota 2 (Anda)
 
 Fungsi:
 - parse_vlan_response(response) : Memproses hasil 'show vlan brief'
