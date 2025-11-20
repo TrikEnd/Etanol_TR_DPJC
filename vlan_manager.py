@@ -1,5 +1,6 @@
 # vlan_manager.py
 """
+
 Fungsi:
 - parse_vlan_response(response) : Memproses hasil 'show vlan brief'
 - get_all_vlans()
@@ -168,18 +169,32 @@ def create_vlan(vlan_id, vlan_name):
         return # Error sudah ditangani di api_client
     
     # Cek sukses/gagal dari respons API (Contoh pengecekan sederhana)
+# Cek sukses/gagal dari respons API (Gunakan cara yang lebih robust)
     try:
-        status_code = response["ins_api"]["outputs"]["output"]["code"]
+        # Dapatkan data 'output' utama
+        output_data = response["ins_api"]["outputs"]["output"]
+        
+        # Jika output_data adalah List, ambil elemen pertama sebagai Dict utama
+        if isinstance(output_data, list):
+            output = output_data[0]
+        else:
+            output = output_data
+
+        # Sekarang kita menggunakan .get() yang aman karena kita tahu 'output' adalah dict
+        status_code = output.get("code")
+        
         if status_code == '200':
             print(f"✅ SUKSES! VLAN ID {vlan_id} berhasil dibuat/diperbarui.")
         else:
             print(f"❌ GAGAL! Perangkat mengembalikan kode status {status_code}.")
-            # Tampilkan pesan error detail dari body jika ada
-            error_msg = response["ins_api"]["outputs"]["output"].get("msg")
+            # Tampilkan pesan error detail dari 'msg' atau 'body'
+            error_msg = output.get("msg") or output.get("body", "Tidak ada pesan detail.")
             print(f"   Pesan Perangkat: {error_msg}")
-    except (TypeError, KeyError):
-        print("❌ GAGAL! Struktur respons tidak lengkap.")
-
+            
+    except (TypeError, KeyError, IndexError) as e:
+        # Tangani error jika struktur JSON benar-benar tidak terduga
+        print(f"❌ GAGAL TOTAL! Struktur respons API tidak terduga.")
+        print(f"   Detail Error Python: {e}")
 
 def update_vlan(vlan_id, vlan_name):
     """
