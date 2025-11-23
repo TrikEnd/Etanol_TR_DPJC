@@ -95,9 +95,9 @@ def menu_delete():
 
 def main():
     print("=== CONFIGURE NX-API CONNECTION ===")
-    base_url = input("Enter NX-API URL (contoh: https://sandbox-nxos-1.cisco.com/ins): ")
-    username = input("Username: ")
-    password = input("Password: ")
+    base_url = input("https://sbx-nxos-mgmt.cisco.com ")
+    username = input("admin")
+    password = input("Admin_1234!")
 
     setup_connection(base_url, username, password)
 
