@@ -28,14 +28,17 @@ def setup_connection(base_url, username, password):
     """
     Menyimpan URL dan kredensial untuk koneksi NX-API.
     Dipanggil sekali dari main.py
+
+    base_url TIDAK perlu memakai /ins
+    karena send_request otomatis menambahkannya.
     """
     global API_URL, USERNAME, PASSWORD
-    API_URL = base_url
+    API_URL = base_url.rstrip("/")   # hapus / di belakang jika ada
     USERNAME = username
     PASSWORD = password
 
     print("[INFO] NX-API connection configured:")
-    print("      URL      :", API_URL)
+    print("      BASE URL :", API_URL)
     print("      USERNAME :", USERNAME)
 
 
@@ -43,11 +46,14 @@ def send_request(payload):
     """
     Fungsi inti untuk mengirim POST request ke NX-API.
 
-    Jika gagal, akan menampilkan error dan mengembalikan None.
+    Endpoint otomatis menjadi:
+        BASE_URL + /ins
     """
+    full_url = API_URL + "/ins"   # ← endpoint wajib NX-API
+
     try:
         response = requests.post(
-            API_URL,
+            full_url,
             data=json.dumps(payload),
             headers=HEADERS,
             auth=(USERNAME, PASSWORD),
@@ -116,12 +122,12 @@ if __name__ == "__main__":
     print("\n=== TEST NX-API CONNECTION ===")
 
     setup_connection(
-        base_url="https://sandbox-nxos-1.cisco.com/ins",
+        base_url="https://sbx-nxos-mgmt.cisco.com",  # ← TANPA /ins
         username="admin",
         password="Admin_1234!"
     )
 
-    print("\n[TEST] Mengirim perintah 'show hostname'...")
+    print("\n[TEST] Mengirim perintah 'show vlan brief'...")
 
     result = cli_show("show vlan brief")
 
