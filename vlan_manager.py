@@ -4,23 +4,32 @@ def parse_vlan_response(response):
     vlan_list = []
 
     try:
-        output_body = response["ins_api"]["outputs"]["output"]["body"]
-        vlan_data = output_body.get("TABLE_vlanbriefid", {}).get("ROW_vlanbriefid")
+        output = response["ins_api"]["outputs"]["output"]
+        body = output.get("body", {})
+
+        vlan_table = body.get("TABLE_vlanbriefxbrief", {})
+        vlan_data = vlan_table.get("ROW_vlanbriefxbrief")
     except (TypeError, KeyError):
-        print("[ERROR] Struktur respons API tidak terduga.")
+        print("[ERROR] Struktur respons API tidak sesuai.")
         return vlan_list
 
     if vlan_data is None:
         return vlan_list
 
     if isinstance(vlan_data, dict):
-        if vlan_data.get('vlan_id') not in ['1', '1002', '1003', '1004', '1005']:
-            vlan_list.append(vlan_data)
+        vlan_data = [vlan_data]
 
-    elif isinstance(vlan_data, list):
-        for vlan in vlan_data:
-            if vlan.get('vlan_id') not in ['1', '1002', '1003', '1004', '1005']:
-                vlan_list.append(vlan)
+    for vlan in vlan_data:
+        vlan_id = vlan.get("vlanshowbr-vlanid")
+        vlan_name = vlan.get("vlanshowbr-vlanname")
+        vlan_state = vlan.get("vlanshowbr-vlanstate")
+
+        if vlan_id not in ['1', '1002', '1003', '1004', '1005']:
+            vlan_list.append({
+                "vlan_id": vlan_id,
+                "vlanname": vlan_name,
+                "state": vlan_state
+            })
 
     return vlan_list
 
@@ -41,6 +50,8 @@ def display_vlans(vlans):
     print("---------------------------------------------------\n")
 
 
+import json
+
 def get_all_vlans():
     print("\n[*] Mengambil semua VLAN...")
     response = api_client.cli_show("show vlan brief")
@@ -51,6 +62,7 @@ def get_all_vlans():
     vlans = parse_vlan_response(response)
     display_vlans(vlans)
     count_vlans(vlans, show_total_only=False)
+
 
 
 def search_vlan(keyword):
@@ -100,9 +112,9 @@ def create_vlan(vlan_id, vlan_name):
             output = output[0]
 
         if output.get("code") == "200":
-            print(f"✅ VLAN {vlan_id} berhasil dibuat.")
+            print(f"VLAN {vlan_id} berhasil dibuat.")
         else:
-            print("❌ Gagal Membuat VLAN :", output.get("msg"))
+            print("Gagal Membuat VLAN :", output.get("msg"))
 
     except Exception as e:
         print(f"[ERROR] Struktur respons tidak sesuai: {e}")
@@ -125,8 +137,8 @@ def delete_vlan(vlan_name):
     try:
         code = response["ins_api"]["outputs"]["output"]["code"]
         if code == "200":
-            print(f"✅ VLAN {vlan_name} berhasil dihapus.")
+            print(f"VLAN {vlan_name} berhasil dihapus.")
         else:
-            print("❌ Gagal :", response["ins_api"]["outputs"]["output"].get("msg"))
+            print("Gagal :", response["ins_api"]["outputs"]["output"].get("msg"))
     except:
         print("[ERROR] Struktur respons error.")

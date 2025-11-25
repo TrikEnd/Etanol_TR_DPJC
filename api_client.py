@@ -1,23 +1,11 @@
-# api_client.py
-"""
-File NX-API Client
-Dikerjakan oleh Anggota 1
-
-Fungsi:
-- Setup koneksi ke NX-API
-- Mengirim request (cli_show & cli_conf)
-- Menangani error
-"""
-
 import requests
 import json
 
-# Disable SSL warnings (sandbox uses self-signed certificate)
+
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning
 )
 
-# Global connection variables
 API_URL = None
 USERNAME = None
 PASSWORD = None
@@ -25,15 +13,9 @@ HEADERS = {"Content-Type": "application/json"}
 
 
 def setup_connection(base_url, username, password):
-    """
-    Menyimpan URL dan kredensial untuk koneksi NX-API.
-    Dipanggil sekali dari main.py
 
-    base_url TIDAK perlu memakai /ins
-    karena send_request otomatis menambahkannya.
-    """
     global API_URL, USERNAME, PASSWORD
-    API_URL = base_url.rstrip("/")   # hapus / di belakang jika ada
+    API_URL = base_url.rstrip("/")  
     USERNAME = username
     PASSWORD = password
 
@@ -43,13 +25,8 @@ def setup_connection(base_url, username, password):
 
 
 def send_request(payload):
-    """
-    Fungsi inti untuk mengirim POST request ke NX-API.
 
-    Endpoint otomatis menjadi:
-        BASE_URL + /ins
-    """
-    full_url = API_URL + "/ins"   # ← endpoint wajib NX-API
+    full_url = API_URL + "/ins"  
 
     try:
         response = requests.post(
@@ -57,14 +34,12 @@ def send_request(payload):
             data=json.dumps(payload),
             headers=HEADERS,
             auth=(USERNAME, PASSWORD),
-            verify=False,   # penting untuk sandbox
+            verify=False,  
             timeout=10
         )
 
-        # Raise error jika status code bukan 200
         response.raise_for_status()
 
-        # Kembalikan JSON hasil API
         return response.json()
 
     except requests.exceptions.Timeout:
@@ -78,11 +53,6 @@ def send_request(payload):
 
 
 def cli_show(command):
-    """
-    Wrapper untuk perintah CLI SHOW (READ)
-    Contoh:
-        cli_show("show vlan brief")
-    """
     payload = {
         "ins_api": {
             "version": "1.0",
@@ -97,11 +67,6 @@ def cli_show(command):
 
 
 def cli_conf(command):
-    """
-    Wrapper untuk perintah CONFIG (CREATE, UPDATE, DELETE)
-    Contoh:
-        cli_conf("vlan 10 ; name SALES")
-    """
     payload = {
         "ins_api": {
             "version": "1.0",
@@ -115,14 +80,11 @@ def cli_conf(command):
     return send_request(payload)
 
 
-# ==========================================================
-#  TEST KONEKSI — bisa langsung dijalankan file ini sendiri
-# ==========================================================
 if __name__ == "__main__":
     print("\n=== TEST NX-API CONNECTION ===")
 
     setup_connection(
-        base_url="https://sbx-nxos-mgmt.cisco.com",  # ← TANPA /ins
+        base_url="https://sbx-nxos-mgmt.cisco.com",  
         username="admin",
         password="Admin_1234!"
     )

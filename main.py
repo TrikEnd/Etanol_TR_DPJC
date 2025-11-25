@@ -5,7 +5,7 @@ def main():
     print("=== CONFIGURE NX-API CONNECTION ===")
 
     base_url = input("Masukkan URL NX-API: ") \
-              or "https://sbx-nxos-mgmt.cisco.com/ins"
+              or "https://sbx-nxos-mgmt.cisco.com"
     username = input("Username (default: admin): ") or "admin"
     password = input("Password (default: Admin_1234!): ") or "Admin_1234!"
 
